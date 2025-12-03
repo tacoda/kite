@@ -37,7 +37,7 @@ describe("Kite MCP Server", () => {
     const toolsList = await client.listTools();
 
     expect(toolsList.tools).toBeDefined();
-    expect(toolsList.tools.length).toBeGreaterThanOrEqual(2);
+    expect(toolsList.tools.length).toBeGreaterThanOrEqual(3);
 
     const helloWorldTool = toolsList.tools.find(
       (tool) => tool.name === "hello_world",
@@ -53,6 +53,14 @@ describe("Kite MCP Server", () => {
     expect(listRepositoriesTool).toBeDefined();
     expect(listRepositoriesTool.description).toBe(
       "List GitHub repositories for a user or organization",
+    );
+
+    const getAssignedPRsTool = toolsList.tools.find(
+      (tool) => tool.name === "get_assigned_pull_requests",
+    );
+    expect(getAssignedPRsTool).toBeDefined();
+    expect(getAssignedPRsTool.description).toBe(
+      "Get pull requests assigned to the authenticated user",
     );
   });
 
@@ -98,5 +106,25 @@ describe("Kite MCP Server", () => {
     expect(repositories[0].stars).toBe(100);
     expect(repositories[1].name).toBe("Spoon-Knife");
     expect(repositories[1].stars).toBe(200);
+  });
+
+  test("should call get_assigned_pull_requests tool with mocked GitHub", async () => {
+    const result = await client.callTool({
+      name: "get_assigned_pull_requests",
+      arguments: {},
+    });
+
+    expect(result.content).toBeDefined();
+    expect(result.content.length).toBe(1);
+    expect(result.content[0].type).toBe("text");
+    
+    // Verify we get the mocked PR data back
+    const pullRequests = JSON.parse(result.content[0].text);
+    expect(pullRequests).toHaveLength(2);
+    expect(pullRequests[0].title).toBe("Add new feature");
+    expect(pullRequests[0].number).toBe(42);
+    expect(pullRequests[0].repo).toBe("octocat/Hello-World");
+    expect(pullRequests[1].title).toBe("Fix bug in parser");
+    expect(pullRequests[1].number).toBe(123);
   });
 });

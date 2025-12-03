@@ -3,12 +3,16 @@ import { GitHub } from "../src/tools/GitHub.ts";
 
 // Mock the octokit module
 const mockListForUser = mock();
+const mockListForAuthenticatedUser = mock();
 
 mock.module("octokit", () => ({
   Octokit: class {
     rest = {
       repos: {
         listForUser: mockListForUser,
+      },
+      issues: {
+        listForAuthenticatedUser: mockListForAuthenticatedUser,
       },
     };
   },
@@ -17,14 +21,15 @@ mock.module("octokit", () => ({
 describe("GitHub", () => {
   beforeEach(() => {
     mockListForUser.mockClear();
+    mockListForAuthenticatedUser.mockClear();
   });
 
   describe("listTools", () => {
-    test("should return an array with one tool", () => {
+    test("should return an array with two tools", () => {
       const tools = GitHub.listTools();
 
       expect(tools).toBeArray();
-      expect(tools).toHaveLength(1);
+      expect(tools).toHaveLength(2);
     });
 
     test("should return list_repositories tool definition", () => {
@@ -208,6 +213,127 @@ describe("GitHub", () => {
       const repositories = JSON.parse(result.content[0].text);
       expect(repositories[0].description).toBe("No description");
       expect(repositories[0].language).toBe("Unknown");
+    });
+
+    test("should get assigned pull requests successfully", async () => {
+      const mockData = [
+        {
+          title: "Add new feature",
+          number: 42,
+          html_url: "https://github.com/octocat/hello-world/pull/42",
+          repository_url: "https://api.github.com/repos/octocat/hello-world",
+          state: "open",
+          user: { login: "contributor" },
+          created_at: "2024-01-10T00:00:00Z",
+          updated_at: "2024-01-15T00:00:00Z",
+          pull_request: { url: "https://api.github.com/repos/octocat/hello-world/pulls/42" },
+        },
+        {
+          title: "Fix bug in parser",
+          number: 123,
+          html_url: "https://github.com/octocat/test-repo/pull/123",
+          repository_url: "https://api.github.com/repos/octocat/test-repo",
+          state: "open",
+          user: { login: "developer" },
+          created_at: "2024-01-12T00:00:00Z",
+          updated_at: "2024-01-16T00:00:00Z",
+          pull_request: { url: "https://api.github.com/repos/octocat/test-repo/pulls/123" },
+        },
+        {
+          title: "Regular issue, not a PR",
+          number: 99,
+          html_url: "https://github.com/octocat/test-repo/issues/99",
+          repository_url: "https://api.github.com/repos/octocat/test-repo",
+          state: "open",
+          user: { login: "user" },
+          created_at: "2024-01-11T00:00:00Z",
+          updated_at: "2024-01-14T00:00:00Z",
+        },
+      ];
+
+      mockListForAuthenticatedUser.mockResolvedValue({ data: mockData });
+
+      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+
+      expect(mockListForAuthenticatedUser).toHaveBeenCalledWith({
+        filter: "assigned",
+        state: "open",
+        sort: "created",
+        direction: "desc",
+        per_page: 30,
+      });
+
+      expect(result.content).toBeDefined();
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0].type).toBe("text");
+
+      const pullRequests = JSON.parse(result.content[0].text);
+      expect(pullRequests).toHaveLength(2); // Should filter out the regular issue
+
+      expect(pullRequests[0]).toEqual({
+        title: "Add new feature",
+        number: 42,
+        url: "https://github.com/octocat/hello-world/pull/42",
+        repo: "octocat/hello-world",
+        state: "open",
+        author: "contributor",
+        created_at: "2024-01-10T00:00:00Z",
+        updated_at: "2024-01-15T00:00:00Z",
+      });
+
+      expect(pullRequests[1]).toEqual({
+        title: "Fix bug in parser",
+        number: 123,
+        url: "https://github.com/octocat/test-repo/pull/123",
+        repo: "octocat/test-repo",
+        state: "open",
+        author: "developer",
+        created_at: "2024-01-12T00:00:00Z",
+        updated_at: "2024-01-16T00:00:00Z",
+      });
+    });
+
+    test("should handle custom parameters for get_assigned_pull_requests", async () => {
+      mockListForAuthenticatedUser.mockResolvedValue({ data: [] });
+
+      await GitHub.callTool("get_assigned_pull_requests", {
+        state: "closed",
+        sort: "updated",
+        direction: "asc",
+        per_page: 10,
+      });
+
+      expect(mockListForAuthenticatedUser).toHaveBeenCalledWith({
+        filter: "assigned",
+        state: "closed",
+        sort: "updated",
+        direction: "asc",
+        per_page: 10,
+      });
+    });
+
+    test("should return empty array when no PRs assigned", async () => {
+      mockListForAuthenticatedUser.mockResolvedValue({ data: [] });
+
+      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+
+      const pullRequests = JSON.parse(result.content[0].text);
+      expect(pullRequests).toHaveLength(0);
+    });
+
+    test("should handle API errors for get_assigned_pull_requests", async () => {
+      mockListForAuthenticatedUser.mockRejectedValue(
+        new Error("Authentication required")
+      );
+
+      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+
+      expect(result.content).toBeDefined();
+      expect(result.content[0].type).toBe("text");
+      expect(result.content[0].text).toBe(
+        "Error fetching assigned pull requests: Authentication required"
+      );
+      expect(result.isError).toBe(true);
     });
   });
 });

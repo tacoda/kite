@@ -30,11 +30,43 @@ export const mockListForUser = mock(async (params: any) => {
   };
 });
 
+export const mockListForAuthenticatedUser = mock(async (params: any) => {
+  return {
+    data: [
+      {
+        title: "Add new feature",
+        number: 42,
+        html_url: "https://github.com/octocat/Hello-World/pull/42",
+        repository_url: "https://api.github.com/repos/octocat/Hello-World",
+        state: "open",
+        user: { login: "contributor" },
+        created_at: "2024-01-10T00:00:00Z",
+        updated_at: "2024-01-15T00:00:00Z",
+        pull_request: { url: "https://api.github.com/repos/octocat/Hello-World/pulls/42" },
+      },
+      {
+        title: "Fix bug in parser",
+        number: 123,
+        html_url: "https://github.com/octocat/Spoon-Knife/pull/123",
+        repository_url: "https://api.github.com/repos/octocat/Spoon-Knife",
+        state: "open",
+        user: { login: "developer" },
+        created_at: "2024-01-12T00:00:00Z",
+        updated_at: "2024-01-16T00:00:00Z",
+        pull_request: { url: "https://api.github.com/repos/octocat/Spoon-Knife/pulls/123" },
+      },
+    ],
+  };
+});
+
 mock.module("octokit", () => ({
   Octokit: class {
     rest = {
       repos: {
         listForUser: mockListForUser,
+      },
+      issues: {
+        listForAuthenticatedUser: mockListForAuthenticatedUser,
       },
     };
   },

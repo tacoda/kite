@@ -35,6 +35,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return await GitHub.callTool(request.params.name, request.params.arguments);
   }
 
+  if (request.params.name === "get_assigned_pull_requests") {
+    return await GitHub.callTool(request.params.name, request.params.arguments);
+  }
+
   throw new Error(`Unknown tool: ${request.params.name}`);
 });
 
