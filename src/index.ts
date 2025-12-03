@@ -5,8 +5,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { HelloWorld } from "./tools/HelloWorld.ts";
-import { GitHub } from "./tools/GitHub.ts";
+import { Tools } from "./tools/Tools.ts";
 
 const server = new Server(
   {
@@ -22,24 +21,12 @@ const server = new Server(
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [...HelloWorld.listTools(), ...GitHub.listTools()],
+    tools: Tools.list(),
   };
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "hello_world") {
-    return HelloWorld.callTool(request.params.name);
-  }
-
-  if (request.params.name === "list_repositories") {
-    return await GitHub.callTool(request.params.name, request.params.arguments);
-  }
-
-  if (request.params.name === "get_assigned_pull_requests") {
-    return await GitHub.callTool(request.params.name, request.params.arguments);
-  }
-
-  throw new Error(`Unknown tool: ${request.params.name}`);
+  return await Tools.call(request.params);
 });
 
 async function main() {
