@@ -12,7 +12,7 @@ export namespace HelloWorld {
     ];
   }
 
-  export function callTool(name: string) {
+  export function sayHello(name: string) {
     return {
       content: [
         {

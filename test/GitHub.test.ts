@@ -38,7 +38,7 @@ describe("GitHub", () => {
 
       expect(tool.name).toBe("list_repositories");
       expect(tool.description).toBe(
-        "List GitHub repositories for a user or organization"
+        "List GitHub repositories for a user or organization",
       );
     });
 
@@ -78,13 +78,7 @@ describe("GitHub", () => {
     });
   });
 
-  describe("callTool", () => {
-    test("should throw error for unknown tool", async () => {
-      await expect(GitHub.callTool("unknown_tool", {})).rejects.toThrow(
-        "Unknown GitHub tool: unknown_tool"
-      );
-    });
-
+  describe("listRepositories", () => {
     test("should call list_repositories successfully", async () => {
       const mockData = [
         {
@@ -113,7 +107,7 @@ describe("GitHub", () => {
 
       mockListForUser.mockResolvedValue({ data: mockData });
 
-      const result = await GitHub.callTool("list_repositories", {
+      const result = await GitHub.listRepositories({
         owner: "octocat",
       });
 
@@ -159,7 +153,7 @@ describe("GitHub", () => {
     test("should handle custom parameters", async () => {
       mockListForUser.mockResolvedValue({ data: [] });
 
-      await GitHub.callTool("list_repositories", {
+      await GitHub.listRepositories({
         owner: "github",
         type: "member",
         sort: "updated",
@@ -177,14 +171,14 @@ describe("GitHub", () => {
     test("should handle API errors", async () => {
       mockListForUser.mockRejectedValue(new Error("API rate limit exceeded"));
 
-      const result = await GitHub.callTool("list_repositories", {
+      const result = await GitHub.listRepositories({
         owner: "octocat",
       });
 
       expect(result.content).toBeDefined();
       expect(result.content[0].type).toBe("text");
       expect(result.content[0].text).toBe(
-        "Error listing repositories: API rate limit exceeded"
+        "Error listing repositories: API rate limit exceeded",
       );
       expect(result.isError).toBe(true);
     });
@@ -206,7 +200,7 @@ describe("GitHub", () => {
 
       mockListForUser.mockResolvedValue({ data: mockData });
 
-      const result = await GitHub.callTool("list_repositories", {
+      const result = await GitHub.listRepositories({
         owner: "user",
       });
 
@@ -214,7 +208,9 @@ describe("GitHub", () => {
       expect(repositories[0].description).toBe("No description");
       expect(repositories[0].language).toBe("Unknown");
     });
+  });
 
+  describe("get_assigned_pull_requests", () => {
     test("should get assigned pull requests successfully", async () => {
       const mockData = [
         {
@@ -226,7 +222,9 @@ describe("GitHub", () => {
           user: { login: "contributor" },
           created_at: "2024-01-10T00:00:00Z",
           updated_at: "2024-01-15T00:00:00Z",
-          pull_request: { url: "https://api.github.com/repos/octocat/hello-world/pulls/42" },
+          pull_request: {
+            url: "https://api.github.com/repos/octocat/hello-world/pulls/42",
+          },
         },
         {
           title: "Fix bug in parser",
@@ -237,7 +235,9 @@ describe("GitHub", () => {
           user: { login: "developer" },
           created_at: "2024-01-12T00:00:00Z",
           updated_at: "2024-01-16T00:00:00Z",
-          pull_request: { url: "https://api.github.com/repos/octocat/test-repo/pulls/123" },
+          pull_request: {
+            url: "https://api.github.com/repos/octocat/test-repo/pulls/123",
+          },
         },
         {
           title: "Regular issue, not a PR",
@@ -253,7 +253,7 @@ describe("GitHub", () => {
 
       mockListForAuthenticatedUser.mockResolvedValue({ data: mockData });
 
-      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+      const result = await GitHub.getAssignedPullRequests({});
 
       expect(mockListForAuthenticatedUser).toHaveBeenCalledWith({
         filter: "assigned",
@@ -296,7 +296,7 @@ describe("GitHub", () => {
     test("should handle custom parameters for get_assigned_pull_requests", async () => {
       mockListForAuthenticatedUser.mockResolvedValue({ data: [] });
 
-      await GitHub.callTool("get_assigned_pull_requests", {
+      await GitHub.getAssignedPullRequests({
         state: "closed",
         sort: "updated",
         direction: "asc",
@@ -315,7 +315,7 @@ describe("GitHub", () => {
     test("should return empty array when no PRs assigned", async () => {
       mockListForAuthenticatedUser.mockResolvedValue({ data: [] });
 
-      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+      const result = await GitHub.getAssignedPullRequests({});
 
       const pullRequests = JSON.parse(result.content[0].text);
       expect(pullRequests).toHaveLength(0);
@@ -323,15 +323,15 @@ describe("GitHub", () => {
 
     test("should handle API errors for get_assigned_pull_requests", async () => {
       mockListForAuthenticatedUser.mockRejectedValue(
-        new Error("Authentication required")
+        new Error("Authentication required"),
       );
 
-      const result = await GitHub.callTool("get_assigned_pull_requests", {});
+      const result = await GitHub.getAssignedPullRequests({});
 
       expect(result.content).toBeDefined();
       expect(result.content[0].type).toBe("text");
       expect(result.content[0].text).toBe(
-        "Error fetching assigned pull requests: Authentication required"
+        "Error fetching assigned pull requests: Authentication required",
       );
       expect(result.isError).toBe(true);
     });

@@ -25,7 +25,8 @@ export namespace GitHub {
             },
             per_page: {
               type: "number",
-              description: "Number of repositories per page (default: 30, max: 100)",
+              description:
+                "Number of repositories per page (default: 30, max: 100)",
             },
           },
           required: ["owner"],
@@ -54,7 +55,8 @@ export namespace GitHub {
             },
             per_page: {
               type: "number",
-              description: "Number of pull requests per page (default: 30, max: 100)",
+              description:
+                "Number of pull requests per page (default: 30, max: 100)",
             },
           },
           required: [],
@@ -63,17 +65,7 @@ export namespace GitHub {
     ];
   }
 
-  export async function callTool(name: string, args: any) {
-    if (name === "list_repositories") {
-      return await listRepositories(args);
-    }
-    if (name === "get_assigned_pull_requests") {
-      return await getAssignedPullRequests(args);
-    }
-    throw new Error(`Unknown GitHub tool: ${name}`);
-  }
-
-  async function listRepositories(args: {
+  export async function listRepositories(args: {
     owner: string;
     type?: string;
     sort?: string;
@@ -123,7 +115,7 @@ export namespace GitHub {
     }
   }
 
-  async function getAssignedPullRequests(args: {
+  export async function getAssignedPullRequests(args: {
     state?: string;
     sort?: string;
     direction?: string;

@@ -8,15 +8,15 @@ export namespace Tools {
 
   export async function call(params: {}) {
     if (params.name === "hello_world") {
-      return HelloWorld.callTool(params.name);
+      return HelloWorld.sayHello();
     }
 
     if (params.name === "list_repositories") {
-      return await GitHub.callTool(params.name, params.arguments);
+      return await GitHub.listRepositories(params.arguments);
     }
 
     if (params.name === "get_assigned_pull_requests") {
-      return await GitHub.callTool(params.name, params.arguments);
+      return await GitHub.getAssignedPullRequests(params.arguments);
     }
 
     throw new Error(`Unknown tool: ${params.name}`);
