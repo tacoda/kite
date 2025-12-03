@@ -1,4 +1,4 @@
-# Kite MCP Server
+# :kite: Kite MCP Server
 
 A simple MCP (Model Context Protocol) server with a `hello_world` tool.
 
