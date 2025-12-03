@@ -21,6 +21,4 @@
     "typescript": "^5.0.0"
   }
 }
-    "@modelcontextprotocol/sdk": "^1.24.2"
-  }
-}
+
