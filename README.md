@@ -8,10 +8,10 @@ A simple MCP (Model Context Protocol) server with a `hello_world` tool.
 bun install
 ```
 
-##
+## Setup Credentials
 
 ```bash
-export GITHUB_TOKEN=""
+cp .env.example .env
 ```
 
 ## Running
