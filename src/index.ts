@@ -1,10 +1,10 @@
-#!/usr/bin/env bun
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { HelloWorld } from "./tools/HelloWorld.ts";
 
 const server = new Server(
   {
@@ -20,29 +20,13 @@ const server = new Server(
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [
-      {
-        name: "hello_world",
-        description: "Returns a simple Hello, World! message",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-    ],
+    tools: HelloWorld.listTools(),
   };
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name === "hello_world") {
-    return {
-      content: [
-        {
-          type: "text",
-          text: "Hello, World!",
-        },
-      ],
-    };
+    return HelloWorld.callTool(request.params.name);
   }
 
   throw new Error(`Unknown tool: ${request.params.name}`);

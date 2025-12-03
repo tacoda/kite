@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "bun run src/index.ts",
-    "test": "bun run test/index.test.ts"
+    "test": "bun run test/index.test.ts",
+    "invoke": "bun run script/hello_world.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.2"
