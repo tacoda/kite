@@ -8,10 +8,29 @@ A simple MCP (Model Context Protocol) server with a `hello_world` tool.
 bun install
 ```
 
+##
+
+```bash
+export GITHUB_TOKEN=""
+```
+
 ## Running
 
 ```bash
 bun start
+```
+
+## Testing
+
+```bash
+bun test
+```
+
+## Invoking Tools
+
+```bash
+bun run script/hello_world.ts
+
 ```
 
 ## Tools

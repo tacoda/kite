@@ -2,18 +2,17 @@
   "name": "kite-mcp-server",
   "version": "1.0.0",
   "description": "Simple MCP server with hello_world tool",
-  "module": "src/index.ts",
+  "module": "kite",
   "type": "module",
   "bin": {
     "kite-mcp-server": "src/index.ts"
   },
   "scripts": {
-    "start": "bun run src/index.ts",
-    "test": "bun run test/index.test.ts",
-    "invoke": "bun run script/hello_world.ts"
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.2"
+    "@modelcontextprotocol/sdk": "^1.24.2",
+    "octokit": "^5.0.5"
   },
   "devDependencies": {
     "@types/bun": "latest"
