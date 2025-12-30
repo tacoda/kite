@@ -31,8 +31,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 async function main() {
   const transport = new StdioServerTransport();
+  console.error("[kite] Connecting to transport...");
   await server.connect(transport);
-  console.error("MCP Server running on stdio");
+  console.error("[kite] MCP Server running on stdio");
+  console.error("[kite] Server ready to accept requests");
 }
 
 main().catch((error) => {
